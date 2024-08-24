@@ -1,21 +1,10 @@
-mod camera_controller;
-
 use bevy::prelude::*;
-use camera_controller::{CameraController, CameraControllerPlugin};
-
-pub struct EnvironmentPlugin;
-impl Plugin for EnvironmentPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_plugins(CameraControllerPlugin);
-        app.add_systems(Startup, setup);
-        app.add_systems(Update, (test_system, rotator_system));
-    }
-}
+use avian3d::prelude::*;
 
 #[derive(Component)]
-struct Rotating;
+pub struct Rotating;
 
-fn test_system(mut windows: Query<&mut Window>, time: Res<Time>) {
+pub fn test_system(mut windows: Query<&mut Window>, time: Res<Time>) {
     let mut window = windows.single_mut();
 
     window.title = format!(
@@ -24,13 +13,13 @@ fn test_system(mut windows: Query<&mut Window>, time: Res<Time>) {
     );
 }
 
-fn rotator_system(time: Res<Time>, mut query: Query<&mut Transform, With<Rotating>>) {
+pub fn rotator_system(time: Res<Time>, mut query: Query<&mut Transform, With<Rotating>>) {
     for mut transform in &mut query {
         transform.rotate_x(3.0 * time.delta_seconds());
     }
 }
 
-fn setup(
+pub fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -86,14 +75,16 @@ fn setup(
 
     // Create sand
     commands
-        .spawn(
+        .spawn((
             PbrBundle {
                 mesh: ocean_handle.clone(),
                 material: sand_material_handle.clone(),
                 transform: Transform::from_xyz(0.0, -5.0, 0.0),
                 ..default()
-            }
-        );
+            },
+            RigidBody::Static,
+            Collider::cuboid(1000.0, 2.0, 1000.0),
+        ));
     
     // Create ambient light
     commands.insert_resource(AmbientLight {
@@ -118,6 +109,5 @@ fn setup(
             transform: Transform::from_xyz(5.0, 10.0, 10.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..default()
         },
-        CameraController::default(),
     ));
 }
