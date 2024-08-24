@@ -19,5 +19,11 @@ fn main() {
             environment::rotator_system,
             character::character_system,
         ))
+        .add_systems(
+            PostUpdate,
+            character::camera_system
+                .after(PhysicsSet::Sync)
+                .before(TransformSystem::TransformPropagate),
+        )
         .run();
 }
