@@ -16,7 +16,7 @@ fn main() {
         ))
         .add_systems(Update, (
             environment::test_system,
-            environment::rotator_system,
+            environment::spinner_system,
             character::character_system,
         ))
         .add_systems(

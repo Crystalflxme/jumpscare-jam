@@ -4,7 +4,7 @@ use avian3d::{math::Scalar, prelude::*};
 const CAMERA_OFFSET: Transform = Transform::from_xyz(0.0, 10.0, 8.0);
 const XZ_AXIS: Vec3 = Vec3 { x: 1.0, y: 0.0, z: 1.0};
 const SPEED: f32 = 5.0;
-const WATER: f32 = 0.0;
+const WATER: f32 = -0.2;
 const BUOY: f32 = 1.8;
 
 #[derive(Component)]
@@ -37,7 +37,7 @@ pub fn character_system(
         let accel = movement_acceleration.0 * delta_time;
         let y = transform.translation.y;
 
-        if y < 0.0 {
+        if y < WATER {
             linear_velocity.y += BUOY * accel * (WATER - y);
         }
 
