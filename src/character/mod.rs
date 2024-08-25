@@ -94,9 +94,13 @@ pub fn camera_system(
     }
 
     for mut camera_transform in &mut set.p1() {
-        camera_transform.translation = character_position.unwrap()
-            * XZ_AXIS
-            + CAMERA_OFFSET.translation;
+        let char_pos = character_position.unwrap();
+        let offset = CAMERA_OFFSET.translation;
+
+        camera_transform.translation =
+            char_pos * XZ_AXIS
+            + offset * XZ_AXIS
+            + Vec3::Y * f32::max(char_pos.y + offset.y, offset.y);
     }
 }
 
@@ -105,16 +109,15 @@ pub fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let boat_handle = meshes.add(Cylinder::new(1.5, 0.5));
-    let boat_material_handle = materials.add(StandardMaterial {
-        base_color: Color::srgb(0.8, 0.6, 0.1),
+    let material = materials.add(StandardMaterial {
+        base_color: Color::srgb(0.9, 0.2, 0.2),
         ..default()
     });
 
     commands.spawn((
         PbrBundle {
-            mesh: boat_handle.clone(),
-            material: boat_material_handle.clone(),
+            mesh: meshes.add(Cylinder::new(1.5, 0.5)),
+            material: material.clone(),
             transform: Transform::from_xyz(0.0, 2.0, 0.0),
             ..default()
         },
