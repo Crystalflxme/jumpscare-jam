@@ -4,9 +4,6 @@ use avian3d::prelude::*;
 #[derive(Component)]
 pub struct Rotating;
 
-#[derive(Component)]
-pub struct RotationSpeed(f32);
-
 pub fn test_system(mut windows: Query<&mut Window>, time: Res<Time>) {
     let mut window = windows.single_mut();
 
@@ -14,23 +11,6 @@ pub fn test_system(mut windows: Query<&mut Window>, time: Res<Time>) {
         "Seconds since startup: {}",
         time.elapsed().as_secs_f32()
     );
-}
-
-pub fn spinner_system(mut query: Query
-    <(
-        &mut LinearVelocity,
-        &mut AngularVelocity,
-        &RotationSpeed
-    ), With<Rotating>>
-) {
-    for (
-        mut linear_velocity,
-        mut angular_velocity,
-        rotation_speed
-    ) in &mut query {
-        linear_velocity.0 = Vec3::ZERO;
-        angular_velocity.0 = -Vec3::Z * rotation_speed.0;
-    }
 }
 
 pub fn setup(
@@ -48,35 +28,21 @@ pub fn setup(
         base_color: Color::srgb(1.0, 0.8, 0.3),
         ..default()
     });
+    let rock_material = materials.add(StandardMaterial {
+        base_color: Color::srgb(0.2, 0.2, 0.25),
+        ..default()
+    });
     let spinner_material = materials.add(StandardMaterial {
         base_color: Color::srgb(0.65, 0.65, 0.7),
         ..default()
     });
 
-    // Spinners
-    commands.spawn((
-        PbrBundle {
-            mesh: meshes.add(Cuboid::new(6.0, 1.0, 2.0)),
-            material: spinner_material.clone(),
-            transform: Transform::from_xyz(0.0, 0.0, 1.0),
-            ..default()
-        },
-        Rotating,
-        RigidBody::Dynamic,
-        Collider::cuboid(6.0, 0.8, 2.0),
-        AngularVelocity(Vec3::ZERO),
-        LinearVelocity(Vec3::ZERO),
-        RotationSpeed(4.0),
-
-        // TODO: Fix rotation consistency
-    ));
-    
-    // Islands
+    // Platforms and spinners
     commands.spawn((
         PbrBundle {
             mesh: meshes.add(Cuboid::new(8.0, 8.0, 8.0)),
             material: sand_material.clone(),
-            transform: Transform::from_xyz(0.0, -4.8, -9.0),
+            transform: Transform::from_xyz(0.5, -4.8, -9.0),
             ..default()
         },
         RigidBody::Static,
@@ -98,11 +64,57 @@ pub fn setup(
         PbrBundle {
             mesh: meshes.add(Cuboid::new(8.0, 8.0, 8.0)),
             material: sand_material.clone(),
-            transform: Transform::from_xyz(8.0, -4.2, -23.0),
+            transform: Transform::from_xyz(8.0, -4.2, -22.0),
             ..default()
         },
         RigidBody::Static,
         Collider::cuboid(8.0, 8.0, 8.0),
+    ));
+
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(Cuboid::new(8.0, 8.0, 6.0)),
+            material: sand_material.clone(),
+            transform: Transform::from_xyz(1.0, -3.0, -22.5),
+            ..default()
+        },
+        RigidBody::Static,
+        Collider::cuboid(8.0, 8.0, 6.0),
+    ));
+
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(Cuboid::new(1.5, 8.0, 1.5)),
+            material: rock_material.clone(),
+            transform: Transform::from_xyz(1.5, -1.5, -24.0),
+            ..default()
+        },
+        RigidBody::Static,
+        Collider::cuboid(1.5, 8.0, 1.5),
+    ));
+
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(Cuboid::new(8.0, 8.0, 6.0)),
+            material: sand_material.clone(),
+            transform: Transform::from_xyz(-5.0, 0.0, -22.0),
+            ..default()
+        },
+        RigidBody::Static,
+        Collider::cuboid(8.0, 8.0, 6.0),
+    ));
+
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(Cuboid::new(6.0, 1.0, 2.0)),
+            material: spinner_material.clone(),
+            transform: Transform::from_xyz(-9.0, 4.5, -23.0),
+            ..default()
+        },
+        Rotating,
+        RigidBody::Kinematic,
+        Collider::cuboid(6.0, 0.8, 2.0),
+        AngularVelocity(Vec3::Y * -4.0),
     ));
 
     // Create ocean
@@ -126,18 +138,12 @@ pub fn setup(
         RigidBody::Static,
         Collider::cuboid(1000.0, 2.0, 1000.0),
     ));
-    
-    // Create ambient light
-    commands.insert_resource(AmbientLight {
-        color: Color::srgb(1.0, 1.0, 1.0),
-        brightness: 0.02,
-    });
 
     // Create light
     commands.spawn(DirectionalLightBundle {
         transform: Transform::from_xyz(4.0, 5.0, -4.0).looking_at(Vec3::ZERO, Vec3::Y),
         directional_light: DirectionalLight {
-            illuminance: light_consts::lux::OVERCAST_DAY,
+            illuminance: 2000.0,
             shadows_enabled: true,
             ..default()
         },
