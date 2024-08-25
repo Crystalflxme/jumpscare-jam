@@ -4,11 +4,11 @@ use avian3d::prelude::*;
 #[derive(Component)]
 pub struct Rotating;
 
-pub fn test_system(mut windows: Query<&mut Window>, time: Res<Time>) {
+pub fn window_system(mut windows: Query<&mut Window>, time: Res<Time>) {
     let mut window = windows.single_mut();
 
     window.title = format!(
-        "Seconds since startup: {}",
+        "Session time: {}",
         time.elapsed().as_secs_f32()
     );
 }
@@ -106,15 +106,59 @@ pub fn setup(
 
     commands.spawn((
         PbrBundle {
-            mesh: meshes.add(Cuboid::new(6.0, 1.0, 2.0)),
+            mesh: meshes.add(Cuboid::new(9.0, 3.0, 0.8)),
             material: spinner_material.clone(),
-            transform: Transform::from_xyz(-9.0, 4.5, -23.0),
+            transform: Transform::from_xyz(-9.0, 5.5, -22.0),
             ..default()
         },
         Rotating,
         RigidBody::Kinematic,
-        Collider::cuboid(6.0, 0.8, 2.0),
-        AngularVelocity(Vec3::Y * -4.0),
+        Collider::cuboid(9.0, 3.0, 0.8),
+        AngularVelocity(Vec3::Y * -2.0),
+    ));
+
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(Cuboid::new(8.0, 8.0, 6.0)),
+            material: sand_material.clone(),
+            transform: Transform::from_xyz(-13.0, 0.0, -22.0),
+            ..default()
+        },
+        RigidBody::Static,
+        Collider::cuboid(8.0, 8.0, 6.0),
+    ));
+
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(Cuboid::new(5.0, 8.0, 5.0)),
+            material: sand_material.clone(),
+            transform: Transform::from_xyz(-17.0, -1.0, -14.0),
+            ..default()
+        },
+        RigidBody::Static,
+        Collider::cuboid(5.0, 8.0, 5.0),
+    ));
+
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(Cuboid::new(1.5, 1.5, 5.0)),
+            material: rock_material.clone(),
+            transform: Transform::from_xyz(-17.0, 3.5, -10.5),
+            ..default()
+        },
+        RigidBody::Static,
+        Collider::cuboid(1.5, 1.5, 5.0),
+    ));
+
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(Cuboid::new(5.0, 8.0, 5.0)),
+            material: sand_material.clone(),
+            transform: Transform::from_xyz(-18.5, -0.5, -2.5),
+            ..default()
+        },
+        RigidBody::Static,
+        Collider::cuboid(5.0, 8.0, 5.0),
     ));
 
     // Create ocean

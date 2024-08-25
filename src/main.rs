@@ -15,8 +15,7 @@ fn main() {
             character::setup,
         ))
         .add_systems(Update, (
-            environment::test_system,
-            environment::spinner_system,
+            environment::window_system,
             character::character_system,
         ))
         .add_systems(
